@@ -12,14 +12,13 @@ namespace MedAppWeb.Services
         public FirebaseService()
         {
             var credentialsJson = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS_JSON");
-            if (credentialsJson != null)
+            if (!string.IsNullOrEmpty(credentialsJson))
             {
                 var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(credentialsJson));
-                var credential = GoogleCredential.FromStream(stream);
-                var client = new FirestoreClientBuilder
-                {
-                    Credential = credential
-                }.Build();
+                var credential = GoogleCredential.FromStream(stream).CreateScoped(
+                    "https://www.googleapis.com/auth/cloud-platform",
+                    "https://www.googleapis.com/auth/datastore");
+                var client = new FirestoreClientBuilder { Credential = credential }.Build();
                 _db = FirestoreDb.Create("medappweb-b6899", client);
             }
             else
