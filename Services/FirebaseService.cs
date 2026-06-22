@@ -13,8 +13,8 @@ namespace MedAppWeb.Services
             var credentialsJson = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS_JSON");
             if (credentialsJson != null)
             {
-                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", null);
-                var tmpFile = Path.GetTempFileName() + ".json";
+                credentialsJson = credentialsJson.Replace("\\n", "\n");
+                var tmpFile = Path.Combine(Path.GetTempPath(), "firebase-credentials.json");
                 File.WriteAllText(tmpFile, credentialsJson);
                 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", tmpFile);
             }
