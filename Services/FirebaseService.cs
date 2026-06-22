@@ -1,4 +1,5 @@
-﻿using Google.Cloud.Firestore;
+﻿using Google.Apis.Auth.OAuth2;
+using Google.Cloud.Firestore;
 using MedAppWeb.Models;
 
 namespace MedAppWeb.Services
@@ -9,9 +10,20 @@ namespace MedAppWeb.Services
 
         public FirebaseService()
         {
-            Environment.SetEnvironmentVariable(
-     "GOOGLE_APPLICATION_CREDENTIALS",
-     Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "firebase-credentials.json"));
+            var credentialsJson = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS_JSON");
+            if (credentialsJson != null)
+            {
+                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", null);
+                var tmpFile = Path.GetTempFileName() + ".json";
+                File.WriteAllText(tmpFile, credentialsJson);
+                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", tmpFile);
+            }
+            else
+            {
+                Environment.SetEnvironmentVariable(
+                    "GOOGLE_APPLICATION_CREDENTIALS",
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "firebase-credentials.json"));
+            }
             _db = FirestoreDb.Create("medappweb-b6899");
         }
 

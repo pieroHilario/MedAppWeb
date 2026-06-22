@@ -5,11 +5,23 @@ using MedAppWeb.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Firebase
-FirebaseApp.Create(new AppOptions()
+var credentialsJson = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS_JSON");
+if (credentialsJson != null)
 {
-    Credential = GoogleCredential.FromFile(
-    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "firebase-credentials.json"))
-});
+    var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(credentialsJson));
+    FirebaseApp.Create(new AppOptions()
+    {
+        Credential = GoogleCredential.FromStream(stream)
+    });
+}
+else
+{
+    FirebaseApp.Create(new AppOptions()
+    {
+        Credential = GoogleCredential.FromFile(
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "firebase-credentials.json"))
+    });
+}
 
 builder.Services.AddSingleton<FirebaseService>();
 builder.Services.AddRazorPages();
