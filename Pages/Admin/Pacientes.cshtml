@@ -1,0 +1,88 @@
+﻿@page
+@model MedAppWeb.Pages.Admin.PacientesModel
+@{
+    ViewData["Title"] = "Gestión de Pacientes";
+}
+
+<h2>Gestión de Pacientes</h2>
+
+<button onclick="mostrarFormulario()" class="btn btn-primary mb-3">+ Agregar Paciente</button>
+
+<div id="formulario" style="display:none;" class="card p-3 mb-3">
+    <input type="hidden" id="pacienteId" />
+    <div class="mb-2"><input class="form-control" id="nombre" placeholder="Nombre" /></div>
+    <div class="mb-2"><input class="form-control" id="dni" placeholder="DNI" /></div>
+    <div class="mb-2"><input class="form-control" id="telefono" placeholder="Teléfono" /></div>
+    <button onclick="guardar()" class="btn btn-success">Guardar</button>
+    <button onclick="cancelar()" class="btn btn-secondary">Cancelar</button>
+</div>
+
+<table class="table table-striped">
+    <thead><tr><th>Nombre</th><th>DNI</th><th>Teléfono</th><th>Acciones</th></tr></thead>
+    <tbody id="tablaPacientes"></tbody>
+</table>
+
+@section Scripts {
+    <script>
+        const apiUrl = "/api/Pacientes";
+
+        async function cargar() {
+            const res = await fetch(apiUrl);
+            const data = await res.json();
+            let html = "";
+            data.forEach(p => {
+                html += `<tr>
+                    <td>${p.nombre}</td><td>${p.dni}</td><td>${p.telefono}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick='editar("${p.id}","${p.nombre}","${p.dni}","${p.telefono}")'>Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick='eliminar("${p.id}")'>Eliminar</button>
+                    </td></tr>`;
+            });
+            document.getElementById("tablaPacientes").innerHTML = html;
+        }
+
+        function mostrarFormulario() {
+            document.getElementById("formulario").style.display = "block";
+            document.getElementById("pacienteId").value = "";
+            document.getElementById("nombre").value = "";
+            document.getElementById("dni").value = "";
+            document.getElementById("telefono").value = "";
+        }
+
+        function cancelar() { document.getElementById("formulario").style.display = "none"; }
+
+        function editar(id, nombre, dni, telefono) {
+            document.getElementById("formulario").style.display = "block";
+            document.getElementById("pacienteId").value = id;
+            document.getElementById("nombre").value = nombre;
+            document.getElementById("dni").value = dni;
+            document.getElementById("telefono").value = telefono;
+        }
+
+        async function guardar() {
+            const id = document.getElementById("pacienteId").value;
+            const body = {
+                nombre: document.getElementById("nombre").value,
+                dni: document.getElementById("dni").value,
+                telefono: document.getElementById("telefono").value,
+                usuarioId: ""
+            };
+            if (id) {
+                await fetch(`${apiUrl}/${id}`, { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) });
+            } else {
+                await fetch(apiUrl, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) });
+            }
+            cancelar();
+            cargar();
+        }
+
+        async function eliminar(id) {
+            if (confirm("¿Eliminar paciente?")) {
+                await fetch(`${apiUrl}/${id}`, { method: "DELETE" });
+                cargar();
+            }
+        }
+
+        cargar();
+    </script>
+}

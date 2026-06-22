@@ -1,0 +1,102 @@
+﻿@page
+@model MedAppWeb.Pages.Admin.CitasModel
+@{
+    ViewData["Title"] = "Gestión de Citas";
+}
+
+<h2>Gestión de Citas</h2>
+
+<button onclick="mostrarFormulario()" class="btn btn-primary mb-3">+ Agregar Cita</button>
+
+<div id="formulario" style="display:none;" class="card p-3 mb-3">
+    <input type="hidden" id="citaId" />
+    <div class="mb-2"><input class="form-control" id="pacienteId" placeholder="ID Paciente" /></div>
+    <div class="mb-2"><input class="form-control" id="medicoId" placeholder="ID Médico" /></div>
+    <div class="mb-2"><input class="form-control" id="fecha" type="date" /></div>
+    <div class="mb-2"><input class="form-control" id="hora" type="time" /></div>
+    <div class="mb-2">
+        <select class="form-control" id="estado">
+            <option>Pendiente</option>
+            <option>Confirmada</option>
+            <option>Cancelada</option>
+        </select>
+    </div>
+    <button onclick="guardar()" class="btn btn-success">Guardar</button>
+    <button onclick="cancelar()" class="btn btn-secondary">Cancelar</button>
+</div>
+
+<table class="table table-striped">
+    <thead><tr><th>Paciente ID</th><th>Médico ID</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>Acciones</th></tr></thead>
+    <tbody id="tablaCitas"></tbody>
+</table>
+
+@section Scripts {
+    <script>
+        const apiUrl = "/api/Citas";
+
+        async function cargar() {
+            const res = await fetch(apiUrl);
+            const data = await res.json();
+            let html = "";
+            data.forEach(c => {
+                html += `<tr>
+                    <td>${c.pacienteId}</td><td>${c.medicoId}</td>
+                    <td>${c.fecha}</td><td>${c.hora}</td><td>${c.estado}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick='editar("${c.id}","${c.pacienteId}","${c.medicoId}","${c.fecha}","${c.hora}","${c.estado}")'>Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick='eliminar("${c.id}")'>Eliminar</button>
+                    </td></tr>`;
+            });
+            document.getElementById("tablaCitas").innerHTML = html;
+        }
+
+        function mostrarFormulario() {
+            document.getElementById("formulario").style.display = "block";
+            document.getElementById("citaId").value = "";
+            document.getElementById("pacienteId").value = "";
+            document.getElementById("medicoId").value = "";
+            document.getElementById("fecha").value = "";
+            document.getElementById("hora").value = "";
+            document.getElementById("estado").value = "Pendiente";
+        }
+
+        function cancelar() { document.getElementById("formulario").style.display = "none"; }
+
+        function editar(id, pacienteId, medicoId, fecha, hora, estado) {
+            document.getElementById("formulario").style.display = "block";
+            document.getElementById("citaId").value = id;
+            document.getElementById("pacienteId").value = pacienteId;
+            document.getElementById("medicoId").value = medicoId;
+            document.getElementById("fecha").value = fecha;
+            document.getElementById("hora").value = hora;
+            document.getElementById("estado").value = estado;
+        }
+
+        async function guardar() {
+            const id = document.getElementById("citaId").value;
+            const body = {
+                pacienteId: document.getElementById("pacienteId").value,
+                medicoId: document.getElementById("medicoId").value,
+                fecha: document.getElementById("fecha").value,
+                hora: document.getElementById("hora").value,
+                estado: document.getElementById("estado").value
+            };
+            if (id) {
+                await fetch(`${apiUrl}/${id}`, { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) });
+            } else {
+                await fetch(apiUrl, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) });
+            }
+            cancelar();
+            cargar();
+        }
+
+        async function eliminar(id) {
+            if (confirm("¿Eliminar cita?")) {
+                await fetch(`${apiUrl}/${id}`, { method: "DELETE" });
+                cargar();
+            }
+        }
+
+        cargar();
+    </script>
+}

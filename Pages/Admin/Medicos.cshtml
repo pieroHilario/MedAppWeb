@@ -1,0 +1,98 @@
+﻿@page
+@model MedAppWeb.Pages.Admin.MedicosModel
+@{
+    ViewData["Title"] = "Gestión de Médicos";
+}
+
+<h2>Gestión de Médicos</h2>
+
+<button onclick="mostrarFormulario()" class="btn btn-primary mb-3">+ Agregar Médico</button>
+
+<div id="formulario" style="display:none;" class="card p-3 mb-3">
+    <input type="hidden" id="medicoId" />
+    <div class="mb-2"><input class="form-control" id="nombre" placeholder="Nombre" /></div>
+    <div class="mb-2"><input class="form-control" id="dni" placeholder="DNI" /></div>
+    <div class="mb-2"><input class="form-control" id="especialidad" placeholder="Especialidad" /></div>
+    <button onclick="guardar()" class="btn btn-success">Guardar</button>
+    <button onclick="cancelar()" class="btn btn-secondary">Cancelar</button>
+</div>
+
+<table class="table table-striped">
+    <thead><tr><th>Nombre</th><th>DNI</th><th>Especialidad</th><th>Acciones</th></tr></thead>
+    <tbody id="tablaMedicos"></tbody>
+</table>
+
+@section Scripts {
+    <script>
+        const apiUrl = "/api/Medicos";
+
+                async function cargar() {
+            try {
+                const res = await fetch(apiUrl);
+                if (!res.ok) throw new Error("Error al cargar");
+                const data = await res.json();
+                let html = "";
+                if (data.length === 0) {
+                    html = "<tr><td colspan='4'>No hay médicos registrados</td></tr>";
+                } else {
+                    data.forEach(m => {
+                        html += `<tr>
+                            <td>${m.nombre}</td><td>${m.dni}</td><td>${m.especialidad}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick='editar("${m.id}","${m.nombre}","${m.dni}","${m.especialidad}")'>Editar</button>
+                                <button class="btn btn-danger btn-sm" onclick='eliminar("${m.id}")'>Eliminar</button>
+                            </td></tr>`;
+                    });
+                }
+                document.getElementById("tablaMedicos").innerHTML = html;
+            } catch(e) {
+                document.getElementById("tablaMedicos").innerHTML = "<tr><td colspan='4'>Error al cargar datos</td></tr>";
+                console.error(e);
+            }
+        }
+
+        function mostrarFormulario() {
+            document.getElementById("formulario").style.display = "block";
+            document.getElementById("medicoId").value = "";
+            document.getElementById("nombre").value = "";
+            document.getElementById("dni").value = "";
+            document.getElementById("especialidad").value = "";
+        }
+
+        function cancelar() { document.getElementById("formulario").style.display = "none"; }
+
+        function editar(id, nombre, dni, especialidad) {
+            document.getElementById("formulario").style.display = "block";
+            document.getElementById("medicoId").value = id;
+            document.getElementById("nombre").value = nombre;
+            document.getElementById("dni").value = dni;
+            document.getElementById("especialidad").value = especialidad;
+        }
+
+        async function guardar() {
+            const id = document.getElementById("medicoId").value;
+            const body = {
+                nombre: document.getElementById("nombre").value,
+                dni: document.getElementById("dni").value,
+                especialidad: document.getElementById("especialidad").value,
+                usuarioId: ""
+            };
+            if (id) {
+                await fetch(`${apiUrl}/${id}`, { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) });
+            } else {
+                await fetch(apiUrl, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) });
+            }
+            cancelar();
+            cargar();
+        }
+
+        async function eliminar(id) {
+            if (confirm("¿Eliminar médico?")) {
+                await fetch(`${apiUrl}/${id}`, { method: "DELETE" });
+                cargar();
+            }
+        }
+        s
+        cargar();
+    </script>
+}
