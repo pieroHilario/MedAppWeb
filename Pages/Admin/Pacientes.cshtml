@@ -1,26 +1,39 @@
-﻿@page
+@page
 @model MedAppWeb.Pages.Admin.PacientesModel
 @{
     ViewData["Title"] = "Gestión de Pacientes";
 }
 
-<h2>Gestión de Pacientes</h2>
-
-<button onclick="mostrarFormulario()" class="btn btn-primary mb-3">+ Agregar Paciente</button>
-
-<div id="formulario" style="display:none;" class="card p-3 mb-3">
-    <input type="hidden" id="pacienteId" />
-    <div class="mb-2"><input class="form-control" id="nombre" placeholder="Nombre" /></div>
-    <div class="mb-2"><input class="form-control" id="dni" placeholder="DNI" /></div>
-    <div class="mb-2"><input class="form-control" id="telefono" placeholder="Teléfono" /></div>
-    <button onclick="guardar()" class="btn btn-success">Guardar</button>
-    <button onclick="cancelar()" class="btn btn-secondary">Cancelar</button>
+<div class="page-heading">
+    <div>
+        <span class="eyebrow">Administración</span>
+        <h1>Gestión de pacientes</h1>
+        <p>Mantén actualizados los datos de contacto y documentos.</p>
+    </div>
+    <button onclick="mostrarFormulario()" class="btn btn-primary">Agregar paciente</button>
 </div>
 
-<table class="table table-striped">
-    <thead><tr><th>Nombre</th><th>DNI</th><th>Teléfono</th><th>Acciones</th></tr></thead>
-    <tbody id="tablaPacientes"></tbody>
-</table>
+<div id="formulario" style="display:none;" class="form-panel">
+    <input type="hidden" id="pacienteId" />
+    <div class="row g-3">
+        <div class="col-md-4"><label class="form-label">Nombre</label><input class="form-control" id="nombre" placeholder="Ej. Luis Torres" /></div>
+        <div class="col-md-4"><label class="form-label">DNI</label><input class="form-control" id="dni" placeholder="Documento" /></div>
+        <div class="col-md-4"><label class="form-label">Teléfono</label><input class="form-control" id="telefono" placeholder="Ej. 999 999 999" /></div>
+    </div>
+    <div class="form-actions">
+        <button onclick="guardar()" class="btn btn-success">Guardar</button>
+        <button onclick="cancelar()" class="btn btn-light">Cancelar</button>
+    </div>
+</div>
+
+<div class="data-panel">
+    <div class="table-responsive">
+        <table class="table align-middle data-table">
+            <thead><tr><th>Nombre</th><th>DNI</th><th>Teléfono</th><th class="text-end">Acciones</th></tr></thead>
+            <tbody id="tablaPacientes"></tbody>
+        </table>
+    </div>
+</div>
 
 @section Scripts {
     <script>
@@ -30,14 +43,18 @@
             const res = await fetch(apiUrl);
             const data = await res.json();
             let html = "";
-            data.forEach(p => {
-                html += `<tr>
-                    <td>${p.nombre}</td><td>${p.dni}</td><td>${p.telefono}</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm" onclick='editar("${p.id}","${p.nombre}","${p.dni}","${p.telefono}")'>Editar</button>
-                        <button class="btn btn-danger btn-sm" onclick='eliminar("${p.id}")'>Eliminar</button>
-                    </td></tr>`;
-            });
+            if (data.length === 0) {
+                html = "<tr><td colspan='4' class='empty-state'>No hay pacientes registrados</td></tr>";
+            } else {
+                data.forEach(p => {
+                    html += `<tr>
+                        <td><strong>${p.nombre}</strong></td><td>${p.dni}</td><td>${p.telefono}</td>
+                        <td class="text-end">
+                            <button class="btn btn-warning btn-sm" onclick='editar("${p.id}","${p.nombre}","${p.dni}","${p.telefono}")'>Editar</button>
+                            <button class="btn btn-outline-danger btn-sm" onclick='eliminar("${p.id}")'>Eliminar</button>
+                        </td></tr>`;
+                });
+            }
             document.getElementById("tablaPacientes").innerHTML = html;
         }
 

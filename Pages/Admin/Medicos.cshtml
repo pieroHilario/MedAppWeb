@@ -1,52 +1,65 @@
-﻿@page
+@page
 @model MedAppWeb.Pages.Admin.MedicosModel
 @{
     ViewData["Title"] = "Gestión de Médicos";
 }
 
-<h2>Gestión de Médicos</h2>
-
-<button onclick="mostrarFormulario()" class="btn btn-primary mb-3">+ Agregar Médico</button>
-
-<div id="formulario" style="display:none;" class="card p-3 mb-3">
-    <input type="hidden" id="medicoId" />
-    <div class="mb-2"><input class="form-control" id="nombre" placeholder="Nombre" /></div>
-    <div class="mb-2"><input class="form-control" id="dni" placeholder="DNI" /></div>
-    <div class="mb-2"><input class="form-control" id="especialidad" placeholder="Especialidad" /></div>
-    <button onclick="guardar()" class="btn btn-success">Guardar</button>
-    <button onclick="cancelar()" class="btn btn-secondary">Cancelar</button>
+<div class="page-heading">
+    <div>
+        <span class="eyebrow">Administración</span>
+        <h1>Gestión de médicos</h1>
+        <p>Organiza el directorio médico y sus especialidades.</p>
+    </div>
+    <button onclick="mostrarFormulario()" class="btn btn-primary">Agregar médico</button>
 </div>
 
-<table class="table table-striped">
-    <thead><tr><th>Nombre</th><th>DNI</th><th>Especialidad</th><th>Acciones</th></tr></thead>
-    <tbody id="tablaMedicos"></tbody>
-</table>
+<div id="formulario" style="display:none;" class="form-panel">
+    <input type="hidden" id="medicoId" />
+    <div class="row g-3">
+        <div class="col-md-4"><label class="form-label">Nombre</label><input class="form-control" id="nombre" placeholder="Ej. Ana Ramos" /></div>
+        <div class="col-md-4"><label class="form-label">DNI</label><input class="form-control" id="dni" placeholder="Documento" /></div>
+        <div class="col-md-4"><label class="form-label">Especialidad</label><input class="form-control" id="especialidad" placeholder="Ej. Cardiología" /></div>
+    </div>
+    <div class="form-actions">
+        <button onclick="guardar()" class="btn btn-success">Guardar</button>
+        <button onclick="cancelar()" class="btn btn-light">Cancelar</button>
+    </div>
+</div>
+
+<div class="data-panel">
+    <div class="table-responsive">
+        <table class="table align-middle data-table">
+            <thead><tr><th>Nombre</th><th>DNI</th><th>Especialidad</th><th class="text-end">Acciones</th></tr></thead>
+            <tbody id="tablaMedicos"></tbody>
+        </table>
+    </div>
+</div>
 
 @section Scripts {
     <script>
         const apiUrl = "/api/Medicos";
 
-                async function cargar() {
+        async function cargar() {
             try {
                 const res = await fetch(apiUrl);
                 if (!res.ok) throw new Error("Error al cargar");
                 const data = await res.json();
                 let html = "";
                 if (data.length === 0) {
-                    html = "<tr><td colspan='4'>No hay médicos registrados</td></tr>";
+                    html = "<tr><td colspan='4' class='empty-state'>No hay médicos registrados</td></tr>";
                 } else {
                     data.forEach(m => {
                         html += `<tr>
-                            <td>${m.nombre}</td><td>${m.dni}</td><td>${m.especialidad}</td>
-                            <td>
+                            <td><strong>${m.nombre}</strong></td><td>${m.dni}</td><td><span class="status-pill info">${m.especialidad}</span></td>
+                            <td class="text-end">
                                 <button class="btn btn-warning btn-sm" onclick='editar("${m.id}","${m.nombre}","${m.dni}","${m.especialidad}")'>Editar</button>
-                                <button class="btn btn-danger btn-sm" onclick='eliminar("${m.id}")'>Eliminar</button>
+                                <button class="btn btn-outline-danger btn-sm" onclick='eliminar("${m.id}")'>Eliminar</button>
                             </td></tr>`;
                     });
                 }
                 document.getElementById("tablaMedicos").innerHTML = html;
             } catch(e) {
-                document.getElementById("tablaMedicos").innerHTML = "<tr><td colspan='4'>Error al cargar datos</td></tr>";
+                document.getElementById("tablaMedicos").innerHTML = "<tr><td colspan='4' class='empty-state'>Error al cargar datos</td></tr>";
                 console.error(e);
             }
         }
@@ -92,7 +105,7 @@
                 cargar();
             }
         }
-        s
+
         cargar();
     </script>
 }
