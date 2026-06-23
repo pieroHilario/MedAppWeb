@@ -1,34 +1,48 @@
-﻿@page
+@page
 @model MedAppWeb.Pages.Admin.CitasModel
 @{
     ViewData["Title"] = "Gestión de Citas";
 }
 
-<h2>Gestión de Citas</h2>
-
-<button onclick="mostrarFormulario()" class="btn btn-primary mb-3">+ Agregar Cita</button>
-
-<div id="formulario" style="display:none;" class="card p-3 mb-3">
-    <input type="hidden" id="citaId" />
-    <div class="mb-2"><input class="form-control" id="pacienteId" placeholder="ID Paciente" /></div>
-    <div class="mb-2"><input class="form-control" id="medicoId" placeholder="ID Médico" /></div>
-    <div class="mb-2"><input class="form-control" id="fecha" type="date" /></div>
-    <div class="mb-2"><input class="form-control" id="hora" type="time" /></div>
-    <div class="mb-2">
-        <select class="form-control" id="estado">
-            <option>Pendiente</option>
-            <option>Confirmada</option>
-            <option>Cancelada</option>
-        </select>
+<div class="page-heading">
+    <div>
+        <span class="eyebrow">Agenda clínica</span>
+        <h1>Gestión de citas</h1>
+        <p>Programa, confirma o cancela atenciones desde una sola vista.</p>
     </div>
-    <button onclick="guardar()" class="btn btn-success">Guardar</button>
-    <button onclick="cancelar()" class="btn btn-secondary">Cancelar</button>
+    <button onclick="mostrarFormulario()" class="btn btn-primary">Agregar cita</button>
 </div>
 
-<table class="table table-striped">
-    <thead><tr><th>Paciente ID</th><th>Médico ID</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>Acciones</th></tr></thead>
-    <tbody id="tablaCitas"></tbody>
-</table>
+<div id="formulario" style="display:none;" class="form-panel">
+    <input type="hidden" id="citaId" />
+    <div class="row g-3">
+        <div class="col-md-6"><label class="form-label">ID Paciente</label><input class="form-control" id="pacienteId" placeholder="Código del paciente" /></div>
+        <div class="col-md-6"><label class="form-label">ID Médico</label><input class="form-control" id="medicoId" placeholder="Código del médico" /></div>
+        <div class="col-md-4"><label class="form-label">Fecha</label><input class="form-control" id="fecha" type="date" /></div>
+        <div class="col-md-4"><label class="form-label">Hora</label><input class="form-control" id="hora" type="time" /></div>
+        <div class="col-md-4">
+            <label class="form-label">Estado</label>
+            <select class="form-select" id="estado">
+                <option>Pendiente</option>
+                <option>Confirmada</option>
+                <option>Cancelada</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-actions">
+        <button onclick="guardar()" class="btn btn-success">Guardar</button>
+        <button onclick="cancelar()" class="btn btn-light">Cancelar</button>
+    </div>
+</div>
+
+<div class="data-panel">
+    <div class="table-responsive">
+        <table class="table align-middle data-table">
+            <thead><tr><th>Paciente ID</th><th>Médico ID</th><th>Fecha</th><th>Hora</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead>
+            <tbody id="tablaCitas"></tbody>
+        </table>
+    </div>
+</div>
 
 @section Scripts {
     <script>
@@ -38,15 +52,20 @@
             const res = await fetch(apiUrl);
             const data = await res.json();
             let html = "";
-            data.forEach(c => {
-                html += `<tr>
-                    <td>${c.pacienteId}</td><td>${c.medicoId}</td>
-                    <td>${c.fecha}</td><td>${c.hora}</td><td>${c.estado}</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm" onclick='editar("${c.id}","${c.pacienteId}","${c.medicoId}","${c.fecha}","${c.hora}","${c.estado}")'>Editar</button>
-                        <button class="btn btn-danger btn-sm" onclick='eliminar("${c.id}")'>Eliminar</button>
-                    </td></tr>`;
-            });
+            if (data.length === 0) {
+                html = "<tr><td colspan='6' class='empty-state'>No hay citas registradas</td></tr>";
+            } else {
+                data.forEach(c => {
+                    const estadoClass = c.estado === "Confirmada" ? "success" : c.estado === "Cancelada" ? "danger" : "warning";
+                    html += `<tr>
+                        <td>${c.pacienteId}</td><td>${c.medicoId}</td>
+                        <td><strong>${c.fecha}</strong></td><td>${c.hora}</td><td><span class="status-pill ${estadoClass}">${c.estado}</span></td>
+                        <td class="text-end">
+                            <button class="btn btn-warning btn-sm" onclick='editar("${c.id}","${c.pacienteId}","${c.medicoId}","${c.fecha}","${c.hora}","${c.estado}")'>Editar</button>
+                            <button class="btn btn-outline-danger btn-sm" onclick='eliminar("${c.id}")'>Eliminar</button>
+                        </td></tr>`;
+                });
+            }
             document.getElementById("tablaCitas").innerHTML = html;
         }
 

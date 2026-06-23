@@ -1,10 +1,63 @@
-﻿@page
+@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Inicio";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="hero-panel">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+            <span class="eyebrow">Panel administrativo</span>
+            <h1>Gestiona citas, médicos y pacientes con más claridad.</h1>
+            <p>
+                Una experiencia rápida para registrar información clínica, revisar agendas y mantener
+                los datos principales del consultorio en orden.
+            </p>
+            <div class="hero-actions">
+                <a class="btn btn-primary btn-lg" asp-page="/Admin/Citas">Ver citas</a>
+                <a class="btn btn-outline-primary btn-lg" asp-page="/Admin/Pacientes">Registrar paciente</a>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="hero-card">
+                <div class="hero-card-header">
+                    <span>Resumen de hoy</span>
+                    <strong>Operativo</strong>
+                </div>
+                <div class="metric-row">
+                    <div>
+                        <span>Citas activas</span>
+                        <strong>24</strong>
+                    </div>
+                    <div>
+                        <span>Médicos</span>
+                        <strong>8</strong>
+                    </div>
+                </div>
+                <div class="timeline">
+                    <div><span></span>08:30 Consulta general</div>
+                    <div><span></span>10:15 Control cardiológico</div>
+                    <div><span></span>12:00 Seguimiento paciente</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="quick-grid">
+    <a class="quick-card" asp-page="/Admin/Medicos">
+        <span class="quick-icon">DR</span>
+        <strong>Médicos</strong>
+        <small>Especialidades y datos profesionales</small>
+    </a>
+    <a class="quick-card" asp-page="/Admin/Pacientes">
+        <span class="quick-icon">PX</span>
+        <strong>Pacientes</strong>
+        <small>Registro y contacto de pacientes</small>
+    </a>
+    <a class="quick-card" asp-page="/Admin/Citas">
+        <span class="quick-icon">CT</span>
+        <strong>Citas</strong>
+        <small>Agenda, estados y programación</small>
+    </a>
+</section>
