@@ -9,16 +9,23 @@ namespace MedAppWeb.Controllers
     public class CitasController : ControllerBase
     {
         private readonly FirebaseService _firebase;
-        public CitasController() { _firebase = new FirebaseService(); }
+        public CitasController(FirebaseService firebase) { _firebase = firebase; }
 
         [HttpGet]
         public async Task<IActionResult> Get() => Ok(await _firebase.GetCitasAsync());
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(string id)
+        {
+            var cita = await _firebase.GetCitaAsync(id);
+            return cita is null ? NotFound(new { message = "Cita no encontrada" }) : Ok(cita);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Cita cita)
         {
-            await _firebase.AddCitaAsync(cita);
-            return Ok(new { message = "Cita agregada" });
+            var id = await _firebase.AddCitaAsync(cita);
+            return Ok(new { message = "Cita agregada", id });
         }
 
         [HttpPut("{id}")]

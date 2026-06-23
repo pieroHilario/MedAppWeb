@@ -9,16 +9,23 @@ namespace MedAppWeb.Controllers
     public class MedicosController : ControllerBase
     {
         private readonly FirebaseService _firebase;
-        public MedicosController() { _firebase = new FirebaseService(); }
+        public MedicosController(FirebaseService firebase) { _firebase = firebase; }
 
         [HttpGet]
         public async Task<IActionResult> Get() => Ok(await _firebase.GetMedicosAsync());
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(string id)
+        {
+            var medico = await _firebase.GetMedicoAsync(id);
+            return medico is null ? NotFound(new { message = "Médico no encontrado" }) : Ok(medico);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Medico medico)
         {
-            await _firebase.AddMedicoAsync(medico);
-            return Ok(new { message = "Médico agregado" });
+            var id = await _firebase.AddMedicoAsync(medico);
+            return Ok(new { message = "Médico agregado", id });
         }
 
         [HttpPut("{id}")]
